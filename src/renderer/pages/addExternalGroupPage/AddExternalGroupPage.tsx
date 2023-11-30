@@ -24,7 +24,9 @@ import {
 
 export default function AddExternalGroupPage() {
   const [traits, setTraits] = useState<TraitObjectsArray>([]);
-  const [externalGroup, setExternalGroup] = useState<ExternalGroup>({});
+  const [externalGroup, setExternalGroup] = useState<ExternalGroup>({
+    traitsIds: [],
+  });
 
   useEffect(() => {
     const cachedTraits: TraitObjectsArray | undefined = getTraits();

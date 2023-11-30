@@ -7,20 +7,26 @@ import './style.css';
 import { TraitObjectsArray } from '../../../models/traitsTypes';
 import { getTraits } from '../../../scripts/cacheManager/traitsCRUD';
 import defaultNewick from './defaultTree';
+import generateNewick from '../../../scripts/phylogeneticTreesScripts/generateNewick';
+import { ExternalGroup } from '../../../models/externalGroupTypes';
+import { getExternalGroup } from '../../../scripts/cacheManager/externalGroupCRUD';
+import { DescendantObjectsArray } from '../../../models/descendantsTypes';
+import { getDescendants } from '../../../scripts/cacheManager/descendantsCRUD';
+import {
+  getTreeNewick,
+  saveTreeNewick,
+} from '../../../scripts/cacheManager/treeNewickCRUD';
 
 export default function Home() {
-  const [alreadyAddedTraits, setAlreadyAddedTraits] = useState(false);
-
-  useEffect(() => {
-    const cachedTraits: TraitObjectsArray | undefined = getTraits();
-    if (cachedTraits === undefined) {
-      setAlreadyAddedTraits(false);
-    } else if (!cachedTraits[0]) {
-      setAlreadyAddedTraits(false);
-    } else if (cachedTraits[0]) {
-      setAlreadyAddedTraits(true);
-    }
-  }, [alreadyAddedTraits]);
+  const [cachedTraits, setCachedTraits] = useState<
+    TraitObjectsArray | undefined
+  >(undefined);
+  const [cachedExternalGroup, setCachedExternalGroup] = useState<
+    ExternalGroup | undefined
+  >(undefined);
+  const [cachedDescendants, setCachedDescendants] = useState<
+    DescendantObjectsArray | undefined
+  >(undefined);
 
   const navigate = useNavigate();
 
@@ -30,11 +36,23 @@ export default function Home() {
     setNwkInputValue(e.target.value);
   };
 
-  const [activeNwkOnTree, setActiveNwkOnTree] = useState(defaultNewick);
+  const [activeNwkOnTree, setActiveNwkOnTree] = useState('');
 
   function updateTree() {
     setActiveNwkOnTree(nwkInputValue);
   }
+
+  useEffect(() => {
+    setCachedTraits(getTraits());
+    setCachedExternalGroup(getExternalGroup());
+    setCachedDescendants(getDescendants());
+    const cachedNewick = getTreeNewick();
+    if (cachedNewick !== undefined) {
+      setActiveNwkOnTree(cachedNewick);
+    } else {
+      setActiveNwkOnTree(defaultNewick);
+    }
+  }, []);
 
   return (
     <div className="Home">
@@ -66,22 +84,38 @@ export default function Home() {
         <div className="comparatorArea">
           <h1 id="comparatorTitle">Comparador</h1>
           <ButtonGroup variant="outlined" size="large" orientation="vertical">
-            {alreadyAddedTraits === true ? (
-              <Button onClick={() => navigate('/addTraits')}>
-                Editar características
-              </Button>
-            ) : (
-              <Button onClick={() => navigate('/addTraits')}>
-                Adicionar características
-              </Button>
-            )}
+            <Button onClick={() => navigate('/addTraits')}>
+              Adicionar características
+            </Button>
+
             <Button onClick={() => navigate('/addExternalGroup')}>
               Adicionar grupo ext.
             </Button>
             <Button onClick={() => navigate('/addDescendants')}>
               Adicionar descendente
             </Button>
-            <Button>Gerar árvore</Button>
+            <Button
+              onClick={() => {
+                if (
+                  cachedTraits !== undefined &&
+                  cachedExternalGroup !== undefined &&
+                  cachedDescendants !== undefined
+                ) {
+                  const newick = generateNewick({
+                    traits: cachedTraits,
+                    externalGroup: cachedExternalGroup,
+                    descendants: cachedDescendants,
+                  });
+                  setActiveNwkOnTree(newick);
+                  saveTreeNewick(newick);
+                } else {
+                  // eslint-disable-next-line no-console
+                  console.error('Missing data!');
+                }
+              }}
+            >
+              Gerar árvore
+            </Button>
           </ButtonGroup>
           {/* <Grid container>
             <Grid item xs={6}>

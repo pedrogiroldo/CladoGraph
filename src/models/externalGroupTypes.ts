@@ -1,3 +1,3 @@
 export interface ExternalGroup {
-  traitsIds?: Array<number>;
+  traitsIds: Array<number>;
 }
