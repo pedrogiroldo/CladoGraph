@@ -93,6 +93,7 @@ export default function AddTraitsPage() {
             size="small"
             onChange={setInputValueFunc}
             value={inputValue}
+            id="traitInput"
           />
           <Button
             variant="contained"
