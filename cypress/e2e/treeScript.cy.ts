@@ -20,6 +20,10 @@ describe('tree script', { testIsolation: false }, () => {
     cy.visit('http://localhost:1212');
   });
 
+  it('clear session storage', () => {
+    cy.clearAllSessionStorage();
+  });
+
   it('passes', () => {
     cy.visit('http://localhost:1212');
   });
@@ -43,9 +47,5 @@ describe('tree script', { testIsolation: false }, () => {
     cy.get('button:contains("Salvar")').click();
   });
 
-  it('add descendants', () => {});
-
-  // it('clear session storage', () => {
-  //   cy.clearAllSessionStorage();
-  // });
+  // it('add descendants', () => {});
 });
