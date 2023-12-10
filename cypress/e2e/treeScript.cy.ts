@@ -16,16 +16,16 @@ const traitList = [
 ];
 
 describe('tree script', { testIsolation: false }, () => {
+  it('passes', () => {
+    cy.visit('http://localhost:1212');
+  });
+
   beforeEach(() => {
     cy.visit('http://localhost:1212');
   });
 
   it('clear session storage', () => {
     cy.clearAllSessionStorage();
-  });
-
-  it('passes', () => {
-    cy.visit('http://localhost:1212');
   });
 
   it('add traits', () => {
