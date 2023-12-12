@@ -3,11 +3,11 @@ import { DescendantObjectsArray } from '../../models/descendantsTypes';
 import { ExternalGroup } from '../../models/externalGroupTypes';
 import { TraitObjectsArray } from '../../models/traitsTypes';
 
-type Props = {
+interface Props {
   traits: TraitObjectsArray;
   externalGroup: ExternalGroup;
   descendants: DescendantObjectsArray;
-};
+}
 
 /**
  *
@@ -52,12 +52,21 @@ export default function generateNewick(props: Props) {
       if (descendant.active !== true) {
         return null;
       }
-      // define value for syn, ples and apo for all descendant
+      // define value for syn, ples and apo for all descendants
       descendant.synapomorphies = 0;
       descendant.plesiomorphies = 0;
       descendant.apomorphies = 0;
 
       // search for plesiomorphies
+      descendant.plesiomorphies = filteredTraits.length;
+      descendant.plesiomorphies -= filteredTraits
+        .map((trait) => {
+          if (trait !== null && descendant.traitsIds.includes(trait.id)) {
+            return trait.id;
+          }
+          return null;
+        })
+        .filter((trait) => trait !== null).length;
       descendant.traitsIds.forEach((traitId) => {
         if (
           externalGroup.traitsIds.includes(traitId) &&
@@ -71,17 +80,19 @@ export default function generateNewick(props: Props) {
       descendant.traitsIds.forEach((traitId) => {
         traitsAndNumberOfDescendantsThatHaveThem.forEach((trait) => {
           if (traitId === trait.id) {
-            if (
-              trait.descendants === 1 &&
-              (descendant.synapomorphies || descendant.synapomorphies === 0)
-            ) {
-              descendant.synapomorphies += 1;
+            if (!externalGroup.traitsIds.includes(traitId)) {
+              if (
+                trait.descendants > 1 &&
+                (descendant.synapomorphies || descendant.synapomorphies === 0)
+              ) {
+                descendant.synapomorphies += 1;
+              } else if (
+                trait.descendants === 1 &&
+                (descendant.apomorphies || descendant.apomorphies === 0)
+              ) {
+                descendant.apomorphies += 1;
+              }
             }
-          } else if (
-            trait.descendants > 1 &&
-            (descendant.apomorphies || descendant.apomorphies === 0)
-          ) {
-            descendant.apomorphies += 1;
           }
         });
       });
@@ -109,6 +120,9 @@ export default function generateNewick(props: Props) {
       .map(({ descendantName }) => `(${descendantName},`)
       .join('')
       .slice(0, -1) + Array(sortedDescendants.length + 1).join(')');
-
+  // consoles
+  console.log(newDescendants);
+  console.log(traitsAndNumberOfDescendantsThatHaveThem);
+  console.log(externalGroup);
   return newick;
 }

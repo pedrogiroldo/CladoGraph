@@ -322,7 +322,7 @@ export default function AddDescendantsPage() {
           </div>
         </div>
       </div>
-      {/* <Button onClick={() => console.log(descendantObjectsArray)}>ver</Button> */}
+      <Button onClick={() => console.log(descendantObjectsArray)}>ver</Button>
     </>
   );
 }
