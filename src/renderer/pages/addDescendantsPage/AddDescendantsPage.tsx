@@ -221,12 +221,14 @@ export default function AddDescendantsPage() {
               size="small"
               onChange={setInputValueFunc}
               value={inputValue}
+              id="descendantNameInput"
             />
             <div className={styles.addDescendantButton}>
               <Button
                 onClick={() => createDescendant(inputValue)}
                 variant="contained"
                 style={{ height: '100%' }}
+                id="addDescendantButton"
               >
                 Adicionar
               </Button>
@@ -274,6 +276,7 @@ export default function AddDescendantsPage() {
                               key={descendant.id + trait.id}
                               control={
                                 <BpCheckbox
+                                  id={`trait${trait.id}descendant${descendant.id}`}
                                   checked={descendant.traitsIds?.includes(
                                     trait.id,
                                   )} // Checking if the trait exists in externalGroup traits array

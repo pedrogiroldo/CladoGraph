@@ -92,7 +92,7 @@ export default function Home() {
               Adicionar grupo ext.
             </Button>
             <Button onClick={() => navigate('/addDescendants')}>
-              Adicionar descendente
+              Adicionar descendentes
             </Button>
             <Button
               onClick={() => {
