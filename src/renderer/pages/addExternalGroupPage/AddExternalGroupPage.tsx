@@ -135,6 +135,7 @@ export default function AddExternalGroupPage() {
                   key={trait.id}
                   control={
                     <BpCheckbox
+                      id={`trait${trait.id}`}
                       checked={externalGroup.traitsIds?.includes(trait.id)} // Checking if the trait exists in externalGroup traits array
                       onChange={() =>
                         handleTraitChange(
