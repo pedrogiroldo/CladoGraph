@@ -30,7 +30,7 @@ export default function generateNewick(props: Props) {
     (trait) => {
       const numberOfDescendants = descendants.reduce((count, descendant) => {
         if (
-          // @ts-ignore
+          trait &&
           descendant.traitsIds.includes(trait.id) &&
           descendant.active === true
         ) {
@@ -52,6 +52,16 @@ export default function generateNewick(props: Props) {
       if (descendant.active !== true) {
         return null;
       }
+
+      const filteredDescendantTraits = filteredTraits
+        .map((trait) => {
+          if (trait !== null && descendant.traitsIds.includes(trait.id)) {
+            return trait.id;
+          }
+          return null;
+        })
+        .filter((trait) => trait !== null);
+
       // define value for syn, ples and apo for all descendants
       descendant.synapomorphies = 0;
       descendant.plesiomorphies = 0;
@@ -59,21 +69,52 @@ export default function generateNewick(props: Props) {
 
       // search for plesiomorphies
       descendant.plesiomorphies = filteredTraits.length;
-      descendant.plesiomorphies -= filteredTraits
-        .map((trait) => {
-          if (trait !== null && descendant.traitsIds.includes(trait.id)) {
-            return trait.id;
-          }
-          return null;
-        })
-        .filter((trait) => trait !== null).length;
+      descendant.plesiomorphies -= filteredDescendantTraits.length;
+
       descendant.traitsIds.forEach((traitId) => {
         if (
           externalGroup.traitsIds.includes(traitId) &&
-          (descendant.plesiomorphies || descendant.plesiomorphies === 0)
+          (descendant.plesiomorphies !== undefined ||
+            descendant.plesiomorphies === 0)
         ) {
           descendant.plesiomorphies += 1;
         }
+        // else {
+        //   traitsAndNumberOfDescendantsThatHaveThem.forEach((trait) => {
+        //     if (traitId === trait.id) {
+        //       if (
+        //         trait.descendants < descendants.length - 1 &&
+        //         (descendant.synapomorphies || descendant.synapomorphies === 0)
+        //       ) {
+        //         descendant.synapomorphies += 1;
+        //       } else if (
+        //         descendant.apomorphies ||
+        //         descendant.apomorphies === 0
+        //       ) {
+        //         descendant.apomorphies += 1;
+        //       }
+        //     }
+        //   });
+        // }
+        // else {
+        //   traitsAndNumberOfDescendantsThatHaveThem.forEach((trait) => {
+        //     if (traitId === trait.id) {
+        //       if (!externalGroup.traitsIds.includes(traitId)) {
+        //         if (
+        //           trait.descendants > 1 &&
+        //           (descendant.synapomorphies || descendant.synapomorphies === 0)
+        //         ) {
+        //           descendant.synapomorphies += 1;
+        //         } else if (
+        //           trait.descendants >= 1 &&
+        //           (descendant.apomorphies || descendant.apomorphies === 0)
+        //         ) {
+        //           descendant.apomorphies += 1;
+        //         }
+        //       }
+        //     }
+        //   });
+        // }
       });
 
       // serach for syn and apo
@@ -87,7 +128,7 @@ export default function generateNewick(props: Props) {
               ) {
                 descendant.synapomorphies += 1;
               } else if (
-                trait.descendants === 1 &&
+                trait.descendants >= 1 &&
                 (descendant.apomorphies || descendant.apomorphies === 0)
               ) {
                 descendant.apomorphies += 1;
@@ -96,6 +137,8 @@ export default function generateNewick(props: Props) {
           }
         });
       });
+      // console.log(descendant.descendantName);
+      // console.log(filteredDescendantTraits);
 
       return descendant;
     })
@@ -122,7 +165,7 @@ export default function generateNewick(props: Props) {
       .slice(0, -1) + Array(sortedDescendants.length + 1).join(')');
   // consoles
   console.log(newDescendants);
-  console.log(traitsAndNumberOfDescendantsThatHaveThem);
-  console.log(externalGroup);
+  // console.log(traitsAndNumberOfDescendantsThatHaveThem);
+  // console.log(externalGroup);
   return newick;
 }
