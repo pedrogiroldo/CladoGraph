@@ -77,6 +77,7 @@ export default function generateNewick(props: Props) {
           (descendant.plesiomorphies !== undefined ||
             descendant.plesiomorphies === 0)
         ) {
+          // console.log('plesio:', traitId, descendant);
           descendant.plesiomorphies += 1;
         }
         // else {
@@ -118,6 +119,19 @@ export default function generateNewick(props: Props) {
       });
 
       // serach for syn and apo
+      filteredTraits.forEach((trait) => {
+        if (
+          trait !== null &&
+          externalGroup.traitsIds.includes(trait?.id) &&
+          !descendant.traitsIds.includes(trait.id) &&
+          (descendant.synapomorphies || descendant.synapomorphies === 0) &&
+          (descendant.plesiomorphies || descendant.plesiomorphies === 0)
+        ) {
+          descendant.synapomorphies += 1;
+          descendant.plesiomorphies -= 1;
+        }
+      });
+
       descendant.traitsIds.forEach((traitId) => {
         traitsAndNumberOfDescendantsThatHaveThem.forEach((trait) => {
           if (traitId === trait.id) {
@@ -127,8 +141,9 @@ export default function generateNewick(props: Props) {
                 (descendant.synapomorphies || descendant.synapomorphies === 0)
               ) {
                 descendant.synapomorphies += 1;
+                // console.log('sinapomorfia', descendant, trait);
               } else if (
-                trait.descendants >= 1 &&
+                trait.descendants === 1 &&
                 (descendant.apomorphies || descendant.apomorphies === 0)
               ) {
                 descendant.apomorphies += 1;
@@ -137,6 +152,7 @@ export default function generateNewick(props: Props) {
           }
         });
       });
+
       // console.log(descendant.descendantName);
       // console.log(filteredDescendantTraits);
 
