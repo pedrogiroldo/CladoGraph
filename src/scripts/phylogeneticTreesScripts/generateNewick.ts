@@ -3,11 +3,11 @@ import { DescendantObjectsArray } from '../../models/descendantsTypes';
 import { ExternalGroup } from '../../models/externalGroupTypes';
 import { TraitObjectsArray } from '../../models/traitsTypes';
 
-type Props = {
+interface Props {
   traits: TraitObjectsArray;
   externalGroup: ExternalGroup;
   descendants: DescendantObjectsArray;
-};
+}
 
 /**
  *
@@ -30,7 +30,7 @@ export default function generateNewick(props: Props) {
     (trait) => {
       const numberOfDescendants = descendants.reduce((count, descendant) => {
         if (
-          // @ts-ignore
+          trait &&
           descendant.traitsIds.includes(trait.id) &&
           descendant.active === true
         ) {
@@ -52,39 +52,109 @@ export default function generateNewick(props: Props) {
       if (descendant.active !== true) {
         return null;
       }
-      // define value for syn, ples and apo for all descendant
+
+      const filteredDescendantTraits = filteredTraits
+        .map((trait) => {
+          if (trait !== null && descendant.traitsIds.includes(trait.id)) {
+            return trait.id;
+          }
+          return null;
+        })
+        .filter((trait) => trait !== null);
+
+      // define value for syn, ples and apo for all descendants
       descendant.synapomorphies = 0;
       descendant.plesiomorphies = 0;
       descendant.apomorphies = 0;
 
       // search for plesiomorphies
+      descendant.plesiomorphies = filteredTraits.length;
+      descendant.plesiomorphies -= filteredDescendantTraits.length;
+
       descendant.traitsIds.forEach((traitId) => {
         if (
           externalGroup.traitsIds.includes(traitId) &&
-          (descendant.plesiomorphies || descendant.plesiomorphies === 0)
+          (descendant.plesiomorphies !== undefined ||
+            descendant.plesiomorphies === 0)
         ) {
+          // console.log('plesio:', traitId, descendant);
           descendant.plesiomorphies += 1;
         }
+        // else {
+        //   traitsAndNumberOfDescendantsThatHaveThem.forEach((trait) => {
+        //     if (traitId === trait.id) {
+        //       if (
+        //         trait.descendants < descendants.length - 1 &&
+        //         (descendant.synapomorphies || descendant.synapomorphies === 0)
+        //       ) {
+        //         descendant.synapomorphies += 1;
+        //       } else if (
+        //         descendant.apomorphies ||
+        //         descendant.apomorphies === 0
+        //       ) {
+        //         descendant.apomorphies += 1;
+        //       }
+        //     }
+        //   });
+        // }
+        // else {
+        //   traitsAndNumberOfDescendantsThatHaveThem.forEach((trait) => {
+        //     if (traitId === trait.id) {
+        //       if (!externalGroup.traitsIds.includes(traitId)) {
+        //         if (
+        //           trait.descendants > 1 &&
+        //           (descendant.synapomorphies || descendant.synapomorphies === 0)
+        //         ) {
+        //           descendant.synapomorphies += 1;
+        //         } else if (
+        //           trait.descendants >= 1 &&
+        //           (descendant.apomorphies || descendant.apomorphies === 0)
+        //         ) {
+        //           descendant.apomorphies += 1;
+        //         }
+        //       }
+        //     }
+        //   });
+        // }
       });
 
       // serach for syn and apo
+      filteredTraits.forEach((trait) => {
+        if (
+          trait !== null &&
+          externalGroup.traitsIds.includes(trait?.id) &&
+          !descendant.traitsIds.includes(trait.id) &&
+          (descendant.synapomorphies || descendant.synapomorphies === 0) &&
+          (descendant.plesiomorphies || descendant.plesiomorphies === 0)
+        ) {
+          descendant.synapomorphies += 1;
+          descendant.plesiomorphies -= 1;
+        }
+      });
+
       descendant.traitsIds.forEach((traitId) => {
         traitsAndNumberOfDescendantsThatHaveThem.forEach((trait) => {
           if (traitId === trait.id) {
-            if (
-              trait.descendants === 1 &&
-              (descendant.synapomorphies || descendant.synapomorphies === 0)
-            ) {
-              descendant.synapomorphies += 1;
+            if (!externalGroup.traitsIds.includes(traitId)) {
+              if (
+                trait.descendants > 1 &&
+                (descendant.synapomorphies || descendant.synapomorphies === 0)
+              ) {
+                descendant.synapomorphies += 1;
+                // console.log('sinapomorfia', descendant, trait);
+              } else if (
+                trait.descendants === 1 &&
+                (descendant.apomorphies || descendant.apomorphies === 0)
+              ) {
+                descendant.apomorphies += 1;
+              }
             }
-          } else if (
-            trait.descendants > 1 &&
-            (descendant.apomorphies || descendant.apomorphies === 0)
-          ) {
-            descendant.apomorphies += 1;
           }
         });
       });
+
+      // console.log(descendant.descendantName);
+      // console.log(filteredDescendantTraits);
 
       return descendant;
     })
@@ -109,6 +179,9 @@ export default function generateNewick(props: Props) {
       .map(({ descendantName }) => `(${descendantName},`)
       .join('')
       .slice(0, -1) + Array(sortedDescendants.length + 1).join(')');
-
+  // consoles
+  console.log(newDescendants);
+  // console.log(traitsAndNumberOfDescendantsThatHaveThem);
+  // console.log(externalGroup);
   return newick;
 }
