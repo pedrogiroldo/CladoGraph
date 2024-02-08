@@ -77,7 +77,11 @@ export default function Home() {
               Gerar
             </Button>
           </div>
-          <Button id="apiButton" size="large">
+          <Button
+            id="apiButton"
+            size="large"
+            onClick={() => navigate('/templates')}
+          >
             Templates
           </Button>
         </div>
