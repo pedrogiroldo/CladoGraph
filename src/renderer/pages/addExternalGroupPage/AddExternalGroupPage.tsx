@@ -172,7 +172,7 @@ export default function AddExternalGroupPage() {
           Salvar
         </Button>
       )}
-      <Button onClick={() => console.log(externalGroup)}>ver</Button>
+      {/* <Button onClick={() => console.log(externalGroup)}>ver</Button> */}
     </div>
   );
 }
