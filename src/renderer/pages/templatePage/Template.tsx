@@ -69,6 +69,7 @@ export default function Template() {
             }
           />
         </div>
+        <div className={styles.traitsTable}></div>
       </div>
     </div>
   );
